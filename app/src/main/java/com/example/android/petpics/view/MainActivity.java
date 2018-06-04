@@ -14,6 +14,7 @@ import android.util.Log;
 import android.widget.Toast;
 
 import com.example.android.petpics.R;
+import com.example.android.petpics.model.AwwImage;
 import com.example.android.petpics.model.RedditPostData;
 import com.example.android.petpics.viewmodel.MyViewModel;
 
@@ -24,7 +25,7 @@ public class MainActivity extends AppCompatActivity
         implements ImageRecyclerViewAdapter.ItemClickListener
 {
 
-    private LiveData<List<RedditPostData>> myLiveData;
+    private LiveData<List<AwwImage>> myLiveData;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -45,46 +46,36 @@ public class MainActivity extends AppCompatActivity
 
         final MyViewModel model = ViewModelProviders.of(MainActivity.this).get(MyViewModel.class);
 
-        final Observer<List<RedditPostData>> myObserver = new Observer<List<RedditPostData>>() {
+        final Observer<List<AwwImage>> myObserver = new Observer<List<AwwImage>>() {
 
             @Override
-            public void onChanged(@Nullable List<RedditPostData> redditPostData) {
+            public void onChanged(@Nullable List<AwwImage> awwImageData) {
 
-                    if (redditPostData == null) {
+                    if (awwImageData == null) {
                         return;
                     }
-
-                    initRecyclerView(redditPostData);
+                    initRecyclerView(awwImageData);
             }
         };
-        myLiveData = model.getRedditPostData();
+        myLiveData = model.getAwwImageData();
         myLiveData.observe(this, myObserver);
     }
     
-    private void initRecyclerView(List<RedditPostData> redditPostData){
+    private void initRecyclerView(List<AwwImage> awwImageData){
         RecyclerView recyclerView = findViewById(R.id.rv);
 //                recyclerView.setLayoutManager(new LinearLayoutManager(MainActivity.this, LinearLayoutManager.VERTICAL, false));
         int numberOfColumns = 3;
         recyclerView.setLayoutManager(new GridLayoutManager(MainActivity.this, numberOfColumns));
-        ImageRecyclerViewAdapter adapter = new ImageRecyclerViewAdapter(redditPostData, MainActivity.this);
+        ImageRecyclerViewAdapter adapter = new ImageRecyclerViewAdapter(awwImageData);
         adapter.setClickListener(this);
         recyclerView.setAdapter(adapter);
-
     }
 
     @Override
-    public void onItemClick(RedditPostData data) {
-
-//        boolean isVideo = Boolean.parseBoolean(data.getIs_video());
-//        if(isVideo) {
-//            Toast.makeText(MainActivity.this, "Videos not supported yet", Toast.LENGTH_SHORT).show();
-//            return;
-//        }
+    public void onItemClick(AwwImage data) {
 
         Intent intent = new Intent(MainActivity.this, ImgActivity.class);
         intent.putExtra("data", data);
         startActivity(intent);
-//        FragmentManager fragmentManager = getSupportFragmentManager();
-//        Fragment fragment = fragmentManager.findFragmentById(R.id.fragment_container);
     }
 }

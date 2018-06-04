@@ -13,6 +13,7 @@ import android.widget.ImageView;
 //import com.bumptech.glide.Glide;
 import com.bumptech.glide.Glide;
 import com.example.android.petpics.R;
+import com.example.android.petpics.model.AwwImage;
 import com.example.android.petpics.model.RedditPostData;
 import com.squareup.picasso.Picasso;
 
@@ -20,13 +21,11 @@ import java.util.List;
 
 public class ImageRecyclerViewAdapter extends RecyclerView.Adapter<ImageRecyclerViewAdapter.ImageViewHolder> {
 
-    private List<RedditPostData> imageURLs;
-    private Context mContext;
+    private List<AwwImage> imageURLs;
     private ItemClickListener mClickListener;
 
-    public ImageRecyclerViewAdapter(List<RedditPostData> imageURLs, Context context) {
+    public ImageRecyclerViewAdapter(List<AwwImage> imageURLs) {
         this.imageURLs = imageURLs;
-        this.mContext = context;
     }
 
     @NonNull
@@ -40,13 +39,10 @@ public class ImageRecyclerViewAdapter extends RecyclerView.Adapter<ImageRecycler
     @Override
     public void onBindViewHolder(@NonNull ImageViewHolder holder, int position) {
 
-        RedditPostData redditPostData = imageURLs.get(position);
-        String imageThumbnail = redditPostData.getThumbnail();
-//        String imageUrl = redditPostData.getUrl();
-        holder.mView.setTag(redditPostData);
-//        GlideDrawableImageViewTarget imageViewTarget = new GlideDrawableImageViewTarget(holder.imageView);
-//        Glide.with(mContext).load(imageThumbnail).into(holder.imageView);
+        AwwImage awwImageData = imageURLs.get(position);
+        String imageThumbnail = awwImageData.getThumbnail();
 
+        holder.mView.setTag(awwImageData);
         Picasso.get().load(imageThumbnail).into(holder.imageView);
     }
 
@@ -74,25 +70,21 @@ public class ImageRecyclerViewAdapter extends RecyclerView.Adapter<ImageRecycler
             mView = itemView;
             imageView = itemView.findViewById(R.id.image);
             imageView.setOnClickListener(this);
-//            imageView.setOnClickListener(this);
         }
 
         @Override
         public void onClick(View view) {
-            RedditPostData redditPostData = (RedditPostData) mView.getTag();
-//            Intent browserIntent = new Intent(Intent.ACTION_VIEW, Uri.parse(imageUrl));
-//            mContext.startActivity(browserIntent);
-//            Log.d("pusha click", "1" + imageUrl);
-            if (mClickListener != null) mClickListener.onItemClick(redditPostData);
+            AwwImage awwImageData = (AwwImage) mView.getTag();
+            if (mClickListener != null) mClickListener.onItemClick(awwImageData);
         }
     }
-//
+
     public void setClickListener(ItemClickListener itemClickListener) {
         this.mClickListener = itemClickListener;
     }
 
     public interface ItemClickListener{
-        void onItemClick(RedditPostData redditPostData);
+        void onItemClick(AwwImage awwImageData);
     }
 
 }

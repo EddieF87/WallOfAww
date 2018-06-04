@@ -1,11 +1,8 @@
 package com.example.android.petpics.model;
 
-import android.os.Parcel;
-import android.os.Parcelable;
-
 import com.google.gson.annotations.SerializedName;
 
-public class RedditPostData implements Parcelable {
+public class RedditPostData {
 
     @SerializedName("thumbnail")
     private String thumbnail;
@@ -28,8 +25,8 @@ public class RedditPostData implements Parcelable {
     @SerializedName("preview")
     private RedditPreview preview;
 
-//    @SerializedName("crosspost_parent_list")
-//    private RedditPostData crosspost_parent_list;
+    @SerializedName("crosspost_parent_list")
+    private RedditPostData[] crosspost_parent_list;
 
     public String getIs_video() {
         return is_video;
@@ -59,51 +56,10 @@ public class RedditPostData implements Parcelable {
         return preview;
     }
 
-//    public RedditPostData getCrosspost_parent_list() {
-//        if(crosspost_parent_list == null) {
-//            return null;
-//        }
-//        return crosspost_parent_list;
-//    }
-
-    protected RedditPostData(Parcel in) {
-        thumbnail = in.readString();
-        url = in.readString();
-        is_video = in.readString();
-        title = in.readString();
-        permalink = in.readString();
-        media = (RedditMedia) in.readValue(RedditMedia.class.getClassLoader());
-        preview = (RedditPreview) in.readValue(RedditPreview.class.getClassLoader());
-//        crosspost_parent_list = (RedditPostData) in.readValue(RedditPostData.class.getClassLoader());
-    }
-
-    @Override
-    public int describeContents() {
-        return 0;
-    }
-
-    @Override
-    public void writeToParcel(Parcel dest, int flags) {
-        dest.writeString(thumbnail);
-        dest.writeString(url);
-        dest.writeString(is_video);
-        dest.writeString(title);
-        dest.writeString(permalink);
-        dest.writeValue(media);
-        dest.writeValue(preview);
-//        dest.writeValue(crosspost_parent_list);
-    }
-
-    @SuppressWarnings("unused")
-    public static final Parcelable.Creator<RedditPostData> CREATOR = new Parcelable.Creator<RedditPostData>() {
-        @Override
-        public RedditPostData createFromParcel(Parcel in) {
-            return new RedditPostData(in);
+    public RedditPostData getCrosspost_parent_list() {
+        if(crosspost_parent_list == null) {
+            return null;
         }
-
-        @Override
-        public RedditPostData[] newArray(int size) {
-            return new RedditPostData[size];
-        }
-    };
+        return crosspost_parent_list[0];
+    }
 }
