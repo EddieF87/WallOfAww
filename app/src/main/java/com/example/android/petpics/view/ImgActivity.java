@@ -1,32 +1,50 @@
 package com.example.android.petpics.view;
 
+import android.arch.lifecycle.ViewModelProviders;
 import android.content.Intent;
 import android.net.Uri;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.MediaController;
 import android.widget.TextView;
+import android.widget.Toast;
 import android.widget.VideoView;
 
-import com.bumptech.glide.Glide;
 import com.example.android.petpics.R;
 import com.example.android.petpics.model.AwwImage;
+import com.example.android.petpics.model.AwwRoomDB;
+import com.example.android.petpics.model.ImageDao;
+import com.example.android.petpics.viewmodel.ImageViewModel;
 import com.squareup.picasso.Callback;
 import com.squareup.picasso.Picasso;
+
+import java.util.List;
 
 public class ImgActivity extends AppCompatActivity {
 
     private AwwImage mAwwImage;
+    private ImageViewModel mImageViewModel;
+    private VideoView mVideoView;
+    private int mVideoPosition;
+    private Menu imageMenu;
+    private ImageDao mImageDao;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_img);
+
+        if(savedInstanceState != null) {
+            mVideoPosition = savedInstanceState.getInt("pos", 0);
+        }
+
+        mImageViewModel = ViewModelProviders.of(this).get(ImageViewModel.class);
+        AwwRoomDB db = AwwRoomDB.getDatabase(getApplication());
+        this.mImageDao = db.imageDao();
 
         mAwwImage = getIntent().getParcelableExtra("data");
 
@@ -53,18 +71,19 @@ public class ImgActivity extends AppCompatActivity {
     private void playVideo(String vidUrl) {
 
         ImageView imageView = findViewById(R.id.image_full);
-        VideoView videoView = findViewById(R.id.vidView);
+        mVideoView = findViewById(R.id.vidView);
         imageView.setVisibility(View.GONE);
-        videoView.setVisibility(View.VISIBLE);
+        mVideoView.setVisibility(View.VISIBLE);
 
         MediaController mc = new MediaController(this);
-        mc.setAnchorView(videoView);
-        mc.setMediaPlayer(videoView);
-        videoView.setMediaController(mc);
+        mc.setAnchorView(mVideoView);
+        mc.setMediaPlayer(mVideoView);
+        mVideoView.setMediaController(mc);
 
         Uri uri = Uri.parse(vidUrl);
-        videoView.setVideoURI(uri);
-        videoView.start();
+        mVideoView.setVideoURI(uri);
+        mVideoView.seekTo(mVideoPosition);
+        mVideoView.start();
     }
 
     private void showImage(String primaryUrl, final String fallbackUrl) {
@@ -95,39 +114,159 @@ public class ImgActivity extends AppCompatActivity {
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.menu_img, menu);
+        imageMenu = menu;
+        checkIfSaved();
         return true;
-    }
-
-    @Override
-    public boolean onPrepareOptionsMenu(Menu menu) {
-        return super.onPrepareOptionsMenu(menu);
     }
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
             case R.id.action_send:
-                sendLink(mAwwImage.getLink());
+                sendLink();
                 break;
             case R.id.action_link:
-                goToLink(mAwwImage.getLink());
+                goToLink();
                 break;
             case R.id.action_save:
-
+                new checkExistenceAsyncTask(mImageDao).execute();
                 break;
         }
         return super.onOptionsItemSelected(item);
     }
 
-    private void sendLink(String link) {
+    private void sendLink() {
+        String link = mAwwImage.getLink();
+        if(link == null) {
+            Toast.makeText(ImgActivity.this, "Link is not valid", Toast.LENGTH_SHORT).show();
+        }
         Intent msgIntent = new Intent(Intent.ACTION_SEND);
         msgIntent.setType("text/plain");
         msgIntent.putExtra(Intent.EXTRA_TEXT, link);
         startActivity(Intent.createChooser(msgIntent, "Share with friends!"));
     }
 
-    private void goToLink(String link) {
+    private void goToLink() {
+        String link = mAwwImage.getLink();
+        if(link == null) {
+            Toast.makeText(ImgActivity.this, "Link is not valid", Toast.LENGTH_SHORT).show();
+        }
         Intent browserIntent = new Intent(Intent.ACTION_VIEW, Uri.parse(link));
         startActivity(browserIntent);
+    }
+
+    private void updateSaveStatus(boolean exists) {
+        if(exists) {
+            removeAwwImage();
+        } else {
+            saveAwwImage();
+        }
+        updateSaveIcon(!exists);
+    }
+
+    private void saveAwwImage() {
+        new insertAsyncTask(mImageDao).execute(mAwwImage);
+    }
+
+    private void removeAwwImage() {
+        new deleteAsyncTask(mImageDao).execute(mAwwImage);
+    }
+
+    private void checkIfSaved(){
+        new setIconAsyncTask(mImageDao).execute();
+    }
+
+    private void updateSaveIcon(boolean saved) {
+        if(saved){
+            imageMenu.findItem(R.id.action_save).setIcon(R.drawable.ic_star);
+        } else {
+            imageMenu.findItem(R.id.action_save).setIcon(R.drawable.ic_action_save);
+        }
+    }
+
+    private static class insertAsyncTask extends android.os.AsyncTask<AwwImage, Void, Void> {
+
+        private ImageDao mAsyncTaskDao;
+
+        insertAsyncTask(ImageDao dao) {
+            mAsyncTaskDao = dao;
+        }
+
+        @Override
+        protected Void doInBackground(final AwwImage... params) {
+            mAsyncTaskDao.insert(params[0]);
+            return null;
+        }
+    }
+
+    private static class deleteAsyncTask extends android.os.AsyncTask<AwwImage, Void, Void> {
+
+        private ImageDao mAsyncTaskDao;
+
+        deleteAsyncTask(ImageDao dao) {
+            mAsyncTaskDao = dao;
+        }
+
+        @Override
+        protected Void doInBackground(final AwwImage... params) {
+            mAsyncTaskDao.remove(params[0].getPrimaryUrl());
+            return null;
+        }
+    }
+
+    private class setIconAsyncTask extends android.os.AsyncTask<Void, Void, List<AwwImage>> {
+
+        private ImageDao mAsyncTaskDao;
+
+        setIconAsyncTask(ImageDao dao) {
+            mAsyncTaskDao = dao;
+        }
+
+        @Override
+        protected List<AwwImage> doInBackground(Void... voids) {
+            return mAsyncTaskDao.checkIfExists(mAwwImage.getPrimaryUrl());
+        }
+
+        @Override
+        protected void onPostExecute(List<AwwImage> list) {
+            if(list == null || list.isEmpty()) {
+                updateSaveIcon(false);
+            } else {
+                updateSaveIcon(true);
+            }
+        }
+    }
+
+    private class checkExistenceAsyncTask extends android.os.AsyncTask<Void, Void, List<AwwImage>> {
+
+        private ImageDao mAsyncTaskDao;
+
+        checkExistenceAsyncTask(ImageDao dao) {
+            mAsyncTaskDao = dao;
+        }
+
+        @Override
+        protected List<AwwImage> doInBackground(Void... voids) {
+            return mAsyncTaskDao.checkIfExists(mAwwImage.getPrimaryUrl());
+        }
+
+        @Override
+        protected void onPostExecute(List<AwwImage> list) {
+            if(list == null || list.isEmpty()) {
+                updateSaveStatus(false);
+            } else {
+                updateSaveStatus(true);
+            }
+        }
+    }
+
+    @Override
+    protected void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+        if(mVideoView != null) {
+            mVideoView.pause();
+            mVideoPosition = mVideoView.getCurrentPosition();
+            outState.putInt("pos", mVideoPosition);
+        }
     }
 }

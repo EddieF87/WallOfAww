@@ -28,6 +28,13 @@ public class RedditPostData {
     @SerializedName("crosspost_parent_list")
     private RedditPostData[] crosspost_parent_list;
 
+    @SerializedName("name")
+    private String name;
+
+    public String getName() {
+        return name;
+    }
+
     public String getIs_video() {
         return is_video;
     }

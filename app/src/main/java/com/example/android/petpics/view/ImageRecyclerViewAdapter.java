@@ -1,20 +1,16 @@
 package com.example.android.petpics.view;
 
-import android.content.Context;
 import android.support.annotation.NonNull;
 import android.support.v7.widget.RecyclerView;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.FrameLayout;
 import android.widget.ImageView;
+import android.widget.RelativeLayout;
+import android.widget.TextView;
 
-//import com.bumptech.glide.Glide;
-import com.bumptech.glide.Glide;
 import com.example.android.petpics.R;
 import com.example.android.petpics.model.AwwImage;
-import com.example.android.petpics.model.RedditPostData;
 import com.squareup.picasso.Picasso;
 
 import java.util.List;
@@ -31,9 +27,9 @@ public class ImageRecyclerViewAdapter extends RecyclerView.Adapter<ImageRecycler
     @NonNull
     @Override
     public ImageViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-        FrameLayout frameLayout = (FrameLayout) LayoutInflater.from(parent.getContext())
+        RelativeLayout relativeLayout = (RelativeLayout) LayoutInflater.from(parent.getContext())
                 .inflate(R.layout.item_img, parent, false);
-        return new ImageViewHolder(frameLayout);
+        return new ImageViewHolder(relativeLayout);
     }
 
     @Override
@@ -43,7 +39,14 @@ public class ImageRecyclerViewAdapter extends RecyclerView.Adapter<ImageRecycler
         String imageThumbnail = awwImageData.getThumbnail();
 
         holder.mView.setTag(awwImageData);
-        Picasso.get().load(imageThumbnail).into(holder.imageView);
+        Picasso.get().load(imageThumbnail)
+                .placeholder(R.drawable.ic_action_link)
+                .into(holder.imageView);
+        if(awwImageData.isVideo()) {
+            holder.gifView.setVisibility(View.VISIBLE);
+        } else {
+            holder.gifView.setVisibility(View.GONE);
+        }
     }
 
     @Override
@@ -63,12 +66,14 @@ public class ImageRecyclerViewAdapter extends RecyclerView.Adapter<ImageRecycler
     class ImageViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener{
 
         private ImageView imageView;
+        private TextView gifView;
         private View mView;
 
         public ImageViewHolder(View itemView) {
             super(itemView);
             mView = itemView;
             imageView = itemView.findViewById(R.id.image);
+            gifView = itemView.findViewById(R.id.gif);
             imageView.setOnClickListener(this);
         }
 

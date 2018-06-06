@@ -1,24 +1,38 @@
 package com.example.android.petpics.model;
 
+import android.arch.persistence.room.Entity;
+import android.arch.persistence.room.PrimaryKey;
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.support.annotation.NonNull;
 
+@Entity(tableName = "aww_table")
 public class AwwImage implements Parcelable {
 
+//    @PrimaryKey(autoGenerate = true)
+//    private int id;
+
+    @PrimaryKey
+    @NonNull
     private String primaryUrl;
+    @NonNull
+    private String thumbnail;
+    @NonNull
+    private String link;
+
     private String fallbackUrl;
     private String title;
-    private String thumbnail;
-    private String link;
     private boolean isVideo;
+    private String name;
 
-    public AwwImage(String primaryUrl, String fallbackUrl, String title, String thumbnail, String link, boolean isVideo) {
+    public AwwImage(String primaryUrl, String fallbackUrl, String title, String thumbnail, String link, boolean isVideo, String name) {
         this.primaryUrl = primaryUrl;
         this.fallbackUrl = fallbackUrl;
         this.title = title;
         this.thumbnail = thumbnail;
         this.link = link;
         this.isVideo = isVideo;
+        this.name = name;
     }
 
     public String getPrimaryUrl() {
@@ -45,12 +59,25 @@ public class AwwImage implements Parcelable {
         return isVideo;
     }
 
+    public String getName() {
+        return name;
+    }
+
+//    public int getId() {
+//        return id;
+//    }
+//
+//    public void setId(int id) {
+//        this.id = id;
+//    }
+
     protected AwwImage(Parcel in) {
         primaryUrl = in.readString();
         fallbackUrl = in.readString();
         title = in.readString();
         thumbnail = in.readString();
         link = in.readString();
+        name = in.readString();
         isVideo = in.readByte() != 0x00;
     }
 
@@ -66,6 +93,7 @@ public class AwwImage implements Parcelable {
         dest.writeString(title);
         dest.writeString(thumbnail);
         dest.writeString(link);
+        dest.writeString(name);
         dest.writeByte((byte) (isVideo ? 0x01 : 0x00));
     }
 
