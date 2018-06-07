@@ -17,7 +17,7 @@ import java.util.List;
 
 public class ImageRecyclerViewAdapter extends RecyclerView.Adapter<ImageRecyclerViewAdapter.ImageViewHolder> {
 
-    private List<AwwImage> imageURLs;
+    private final List<AwwImage> imageURLs;
     private ItemClickListener mClickListener;
 
     public ImageRecyclerViewAdapter(List<AwwImage> imageURLs) {
@@ -40,7 +40,8 @@ public class ImageRecyclerViewAdapter extends RecyclerView.Adapter<ImageRecycler
 
         holder.mView.setTag(awwImageData);
         Picasso.get().load(imageThumbnail)
-                .placeholder(R.drawable.ic_action_link)
+                .placeholder(R.drawable.ic_paw)
+                .error(R.drawable.ic_broken_img)
                 .into(holder.imageView);
         if(awwImageData.isVideo()) {
             holder.gifView.setVisibility(View.VISIBLE);
@@ -58,18 +59,13 @@ public class ImageRecyclerViewAdapter extends RecyclerView.Adapter<ImageRecycler
         }
     }
 
-    @Override
-    public long getItemId(int position) {
-        return super.getItemId(position);
-    }
-
     class ImageViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener{
 
-        private ImageView imageView;
-        private TextView gifView;
-        private View mView;
+        private final ImageView imageView;
+        private final TextView gifView;
+        private final View mView;
 
-        public ImageViewHolder(View itemView) {
+        ImageViewHolder(View itemView) {
             super(itemView);
             mView = itemView;
             imageView = itemView.findViewById(R.id.image);

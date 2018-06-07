@@ -13,27 +13,24 @@ import java.util.List;
 public class MyViewModel extends AndroidViewModel {
 
 
-    private Repo mRepo;
+    private final Repo mRepo;
     private MutableLiveData<List<AwwImage>> mAwwImageData;
     private boolean isFavorites;
 
     public MyViewModel(@NonNull Application application) {
         super(application);
         mRepo = new Repo(application);
-        getDataFromRepository();
     }
 
-    //Returns data if it already exists, otherwise gets new data from FactsRepository
-    public LiveData<List<AwwImage>> getAwwImageData(){
+    public LiveData<List<AwwImage>> getAwwImageData(String path){
         if(this.mAwwImageData != null) {
             return this.mAwwImageData;
         }
-        return getDataFromRepository();
+        return getDataFromRepository(path);
     }
 
-    //Fetch and set new LiveData from Repo
-    public LiveData<List<AwwImage>> getDataFromRepository() {
-        this.mAwwImageData = mRepo.addLiveData(null);
+    private LiveData<List<AwwImage>> getDataFromRepository(String path) {
+        this.mAwwImageData = mRepo.addLiveData(path,null);
         return this.mAwwImageData;
     }
 
@@ -45,25 +42,22 @@ public class MyViewModel extends AndroidViewModel {
         isFavorites = !isFavorites;
     }
 
-    //Fetch and set saved images to LiveData from Repo
-    public LiveData<List<AwwImage>> toggleFavorites() {
+    public void toggleFavorites(String path) {
         isFavorites = !isFavorites;
         if(isFavorites){
-//            this.mAwwImageData.setValue(mRepo.getFavorites());
-            return mRepo.getFavorites();
+            mRepo.getFavorites();
         } else {
-//            this.mAwwImageData.setValue();
-            return mRepo.addLiveData(null);
+            mRepo.addLiveData(path, null);
         }
     }
 
-    public LiveData<List<AwwImage>> addImages(String id) {
+    public void addImages(String path, String id) {
+        mRepo.addLiveData(path, id);
+    }
+
+    public void getFreshData(String path) {
         if(!isFavorites){
-            return mRepo.addLiveData(id);
+            mRepo.getFreshData(path);
         }
-        return this.mAwwImageData;
     }
-
-//    public void insert(AwwImage awwImage) { mRepo.insert(awwImage);}
-
 }

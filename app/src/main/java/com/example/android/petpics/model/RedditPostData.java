@@ -69,4 +69,52 @@ public class RedditPostData {
         }
         return crosspost_parent_list[0];
     }
+
+    public static class RedditMedia {
+        @SerializedName("reddit_video")
+        private RedditVideo reddit_video;
+
+        public RedditVideo getReddit_video() {
+            return reddit_video;
+        }
+    }
+
+    static class RedditParent {
+
+        @SerializedName("media")
+        private RedditMedia media;
+
+        public RedditMedia getMedia() {
+            return media;
+        }
+    }
+
+    public static class RedditVideo {
+
+        @SerializedName("scrubber_media_url")
+        private String scrubber_media_url;
+
+        public String getScrubber_media_url() {
+            return scrubber_media_url;
+        }
+
+        @SerializedName("fallback_url")
+        private String fallback_url;
+
+        public String getFallback_url() {
+            return fallback_url;
+        }
+
+    }
+
+    public static class RedditPreview {
+
+
+        public RedditVideo getReddit_video_preview() {
+            return reddit_video_preview;
+        }
+
+        @SerializedName("reddit_video_preview")
+        private RedditVideo reddit_video_preview;
+    }
 }

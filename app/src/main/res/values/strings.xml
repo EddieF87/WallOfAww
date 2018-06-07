@@ -1,6 +1,15 @@
 <resources>
-    <string name="app_name">PetPics</string>
-
-    <!-- TODO: Remove or change this placeholder text -->
-    <string name="hello_blank_fragment">Hello blank fragment</string>
+    <string name="app_name">Wall of Aww</string>
+    <string name="cancel">Cancel</string>
+    <string name="save">Save</string>
+    <string name="gif">GIF</string>
+    <string name="link">Link</string>
+    <string name="send">Send</string>
+    <string name="favs">Favs</string>
+    <string name="edit">Edit</string>
+    <string name="r_aww">r/aww</string>
+    <string name="r_corgi">r/corgi</string>
+    <string name="r_rarepuppers">r/rarepuppers</string>
+    <string name="r_eyebleach">r/eyebleach</string>
+    <string name="image">image</string>
 </resources>

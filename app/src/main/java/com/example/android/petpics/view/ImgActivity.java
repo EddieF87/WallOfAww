@@ -11,7 +11,6 @@ import android.view.View;
 import android.widget.ImageView;
 import android.widget.MediaController;
 import android.widget.TextView;
-import android.widget.Toast;
 import android.widget.VideoView;
 
 import com.example.android.petpics.R;
@@ -27,7 +26,7 @@ import java.util.List;
 public class ImgActivity extends AppCompatActivity {
 
     private AwwImage mAwwImage;
-    private ImageViewModel mImageViewModel;
+//    private ImageViewModel mImageViewModel;
     private VideoView mVideoView;
     private int mVideoPosition;
     private Menu imageMenu;
@@ -42,7 +41,7 @@ public class ImgActivity extends AppCompatActivity {
             mVideoPosition = savedInstanceState.getInt("pos", 0);
         }
 
-        mImageViewModel = ViewModelProviders.of(this).get(ImageViewModel.class);
+//        mImageViewModel = ViewModelProviders.of(this).get(ImageViewModel.class);
         AwwRoomDB db = AwwRoomDB.getDatabase(getApplication());
         this.mImageDao = db.imageDao();
 
@@ -50,12 +49,7 @@ public class ImgActivity extends AppCompatActivity {
 
         if (mAwwImage.isVideo()) {
             String vidUrl = mAwwImage.getPrimaryUrl();
-            if (vidUrl != null) {
-                playVideo(vidUrl);
-            } else {
-                vidUrl = mAwwImage.getFallbackUrl();
-                playVideo(vidUrl);
-            }
+            playVideo(vidUrl);
         } else {
             String primaryUrl = mAwwImage.getPrimaryUrl();
             String fallbackUrl = mAwwImage.getFallbackUrl();
@@ -90,7 +84,7 @@ public class ImgActivity extends AppCompatActivity {
         final ImageView imageView = findViewById(R.id.image_full);
         Picasso.get()
                 .load(primaryUrl)
-                .placeholder(R.drawable.ic_action_save)
+                .placeholder(R.drawable.ic_paw)
                 .fit()
                 .centerInside()
                 .into(imageView, new Callback() {
@@ -104,7 +98,7 @@ public class ImgActivity extends AppCompatActivity {
                                 .load(fallbackUrl)
                                 .fit()
                                 .centerInside()
-                                .placeholder(R.drawable.ic_action_link)
+                                .placeholder(R.drawable.ic_paw)
                                 .error(R.drawable.ic_broken_img)
                                 .into(imageView);
                     }
@@ -137,9 +131,6 @@ public class ImgActivity extends AppCompatActivity {
 
     private void sendLink() {
         String link = mAwwImage.getLink();
-        if(link == null) {
-            Toast.makeText(ImgActivity.this, "Link is not valid", Toast.LENGTH_SHORT).show();
-        }
         Intent msgIntent = new Intent(Intent.ACTION_SEND);
         msgIntent.setType("text/plain");
         msgIntent.putExtra(Intent.EXTRA_TEXT, link);
@@ -148,9 +139,6 @@ public class ImgActivity extends AppCompatActivity {
 
     private void goToLink() {
         String link = mAwwImage.getLink();
-        if(link == null) {
-            Toast.makeText(ImgActivity.this, "Link is not valid", Toast.LENGTH_SHORT).show();
-        }
         Intent browserIntent = new Intent(Intent.ACTION_VIEW, Uri.parse(link));
         startActivity(browserIntent);
     }
@@ -186,7 +174,7 @@ public class ImgActivity extends AppCompatActivity {
 
     private static class insertAsyncTask extends android.os.AsyncTask<AwwImage, Void, Void> {
 
-        private ImageDao mAsyncTaskDao;
+        private final ImageDao mAsyncTaskDao;
 
         insertAsyncTask(ImageDao dao) {
             mAsyncTaskDao = dao;
@@ -201,7 +189,7 @@ public class ImgActivity extends AppCompatActivity {
 
     private static class deleteAsyncTask extends android.os.AsyncTask<AwwImage, Void, Void> {
 
-        private ImageDao mAsyncTaskDao;
+        private final ImageDao mAsyncTaskDao;
 
         deleteAsyncTask(ImageDao dao) {
             mAsyncTaskDao = dao;
@@ -216,7 +204,7 @@ public class ImgActivity extends AppCompatActivity {
 
     private class setIconAsyncTask extends android.os.AsyncTask<Void, Void, List<AwwImage>> {
 
-        private ImageDao mAsyncTaskDao;
+        private final ImageDao mAsyncTaskDao;
 
         setIconAsyncTask(ImageDao dao) {
             mAsyncTaskDao = dao;
@@ -239,7 +227,7 @@ public class ImgActivity extends AppCompatActivity {
 
     private class checkExistenceAsyncTask extends android.os.AsyncTask<Void, Void, List<AwwImage>> {
 
-        private ImageDao mAsyncTaskDao;
+        private final ImageDao mAsyncTaskDao;
 
         checkExistenceAsyncTask(ImageDao dao) {
             mAsyncTaskDao = dao;

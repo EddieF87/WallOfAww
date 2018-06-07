@@ -10,7 +10,7 @@
         android:layout_height="match_parent"
         android:padding="1dp"
         android:adjustViewBounds="true"
-        />
+        android:contentDescription="@string/image" />
 
     <TextView
         android:id="@+id/gif"
@@ -18,7 +18,7 @@
         android:layout_height="wrap_content"
         android:textSize="24sp"
         android:textStyle="bold"
-        android:text="GIF"
+        android:text="@string/gif"
         android:textColor="@color/colorPrimaryDark"
         android:background="#88ffffff"
         android:padding="4dp"

@@ -1,23 +1,16 @@
 package com.example.android.petpics.viewmodel;
 
 import android.app.Application;
-import android.arch.lifecycle.LiveData;
 import android.arch.lifecycle.MutableLiveData;
 import android.os.AsyncTask;
-import android.util.Log;
-import android.widget.ImageView;
+import android.support.annotation.NonNull;
 
-import com.example.android.petpics.R;
 import com.example.android.petpics.model.AwwImage;
 import com.example.android.petpics.model.AwwRoomDB;
 import com.example.android.petpics.model.ImageDao;
 import com.example.android.petpics.model.RedditAPI;
-import com.example.android.petpics.model.RedditMedia;
 import com.example.android.petpics.model.RedditPOJO;
 import com.example.android.petpics.model.RedditPostData;
-import com.example.android.petpics.model.RedditPreview;
-import com.example.android.petpics.model.RedditVideo;
-import com.squareup.picasso.Picasso;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -30,19 +23,17 @@ import retrofit2.converter.gson.GsonConverterFactory;
 
 public class Repo {
 
-    //Sample URL to retrieve data from to display to user
     private static final String BASE_URL = "https://www.reddit.com";
-    private ImageDao mImageDao;
+    private final ImageDao mImageDao;
     private List<AwwImage> mFavorites;
     private MutableLiveData<List<AwwImage>> mImages;
-
 
     Repo(Application application) {
         AwwRoomDB db = AwwRoomDB.getDatabase(application);
         this.mImageDao = db.imageDao();
     }
 
-    public MutableLiveData<List<AwwImage>> addLiveData(String id) {
+    public MutableLiveData<List<AwwImage>> addLiveData(String path, String id) {
 
         final List<AwwImage> awwImages;
 
@@ -52,35 +43,32 @@ public class Repo {
         } else {
             awwImages = mImages.getValue();
         }
+        return getmImages(awwImages, path, id);
+    }
 
+    private MutableLiveData<List<AwwImage>> getmImages(final List<AwwImage> awwImages, String path, String id) {
         Retrofit.Builder builder = new Retrofit.Builder()
                 .baseUrl(BASE_URL)
                 .addConverterFactory(GsonConverterFactory.create());
         Retrofit retrofit = builder.build();
 
-        String callUrl;
-        if(id == null) {
-            callUrl = BASE_URL + "/r/aww+rarepuppers+corgi/.json?limit=30";
-        } else {
-            callUrl = BASE_URL + "/r/aww+rarepuppers+corgi/.json?limit=30&after=" + id;
-        }
-        Log.d("poop", "callUrl = " + callUrl);
-
         Call<RedditPOJO> redditCall
-                = retrofit.create(RedditAPI.class).retrieveData(callUrl);
+                = retrofit.create(RedditAPI.class).retrieveData(path, id);
 
         redditCall.enqueue(new Callback<RedditPOJO>() {
             @Override
-            public void onResponse(Call<RedditPOJO> call, Response<RedditPOJO> response) {
-                RedditPOJO.RedditPost[] redditPosts = response.body().getData().getChildren();
-                List<AwwImage> newAwwImageList = getList(redditPosts);
-                awwImages.addAll(newAwwImageList);
-                mImages.postValue(awwImages);
+            public void onResponse(@NonNull Call<RedditPOJO> call, @NonNull Response<RedditPOJO> response) {
+                try {
+                    @SuppressWarnings("ConstantConditions") RedditPOJO.RedditPost[] redditPosts = response.body().getData().getChildren();
+                    List<AwwImage> newAwwImageList = getList(redditPosts);
+                    awwImages.addAll(newAwwImageList);
+                    mImages.postValue(awwImages);
+                }
+                catch (Exception ignored){}
             }
 
             @Override
-            public void onFailure(Call<RedditPOJO> call, Throwable t) {
-                Log.d("pusha", "FAILLL" + t.toString());
+            public void onFailure(@NonNull Call<RedditPOJO> call, @NonNull Throwable t) {
             }
         });
         return mImages;
@@ -91,13 +79,13 @@ public class Repo {
         for(RedditPOJO.RedditPost redditPost : redditPosts) {
             try {
                 RedditPostData redditPostData = redditPost.getData();
-                RedditMedia media = redditPostData.getMedia();
-                RedditPreview preview = redditPostData.getPreview();
+                RedditPostData.RedditMedia media = redditPostData.getMedia();
+                RedditPostData.RedditPreview preview = redditPostData.getPreview();
                 RedditPostData parent = redditPostData.getCrosspost_parent_list();
 
                 String title = redditPostData.getTitle();
                 String thumbnail = redditPostData.getThumbnail();
-                if(thumbnail==null){
+                if(thumbnail.equals("self")){
                     continue;
                 }
                 String name = redditPostData.getName();
@@ -107,7 +95,7 @@ public class Repo {
                 boolean isVideo;
 
                 if(media != null) {
-                    RedditVideo redditVideo = media.getReddit_video();
+                    RedditPostData.RedditVideo redditVideo = media.getReddit_video();
                     if(redditVideo != null) {
                         primary = redditVideo.getScrubber_media_url();
                         fallback = redditVideo.getFallback_url();
@@ -117,16 +105,15 @@ public class Repo {
                     }
                 }
                 else if (preview != null && preview.getReddit_video_preview() != null) {
-                    RedditVideo redditVideo = preview.getReddit_video_preview();
+                    RedditPostData.RedditVideo redditVideo = preview.getReddit_video_preview();
                     primary = redditVideo.getScrubber_media_url();
                     fallback = redditVideo.getFallback_url();
                     isVideo = true;
                 }
                 else if (parent != null && parent.getMedia() != null) {
-                    Log.d("jakk", "parent != null");
-                    RedditMedia parentMedia = parent.getMedia();
+                    RedditPostData.RedditMedia parentMedia = parent.getMedia();
                     if(parentMedia != null) {
-                        RedditVideo redditVideo = parentMedia.getReddit_video();
+                        RedditPostData.RedditVideo redditVideo = parentMedia.getReddit_video();
                         primary = redditVideo.getScrubber_media_url();
                         fallback = redditVideo.getFallback_url();
                         isVideo = true;
@@ -147,14 +134,23 @@ public class Repo {
         return awwImageList;
     }
 
-    public MutableLiveData<List<AwwImage>> getFavorites() {
+    public void getFreshData(String path) {
+        List<AwwImage> awwImages = mImages.getValue();
+        if(awwImages == null) {
+            awwImages = new ArrayList<>();
+        } else {
+            awwImages.clear();
+        }
+        getmImages(awwImages, path, null);
+    }
+
+    public void getFavorites() {
         new queryAsyncTask(mImageDao).execute();
-        return mImages;
     }
 
     private class queryAsyncTask extends AsyncTask<Void, Void, Void> {
 
-        private ImageDao mAsyncTaskDao;
+        private final ImageDao mAsyncTaskDao;
 
         queryAsyncTask(ImageDao dao) {
             mAsyncTaskDao = dao;

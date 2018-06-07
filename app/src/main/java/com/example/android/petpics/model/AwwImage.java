@@ -9,23 +9,20 @@ import android.support.annotation.NonNull;
 @Entity(tableName = "aww_table")
 public class AwwImage implements Parcelable {
 
-//    @PrimaryKey(autoGenerate = true)
-//    private int id;
-
     @PrimaryKey
     @NonNull
-    private String primaryUrl;
+    private final String primaryUrl;
     @NonNull
-    private String thumbnail;
+    private final String thumbnail;
     @NonNull
-    private String link;
+    private final String link;
 
-    private String fallbackUrl;
-    private String title;
-    private boolean isVideo;
-    private String name;
+    private final String fallbackUrl;
+    private final String title;
+    private final boolean isVideo;
+    private final String name;
 
-    public AwwImage(String primaryUrl, String fallbackUrl, String title, String thumbnail, String link, boolean isVideo, String name) {
+    public AwwImage(@NonNull String primaryUrl, String fallbackUrl, String title, @NonNull String thumbnail, @NonNull String link, boolean isVideo, String name) {
         this.primaryUrl = primaryUrl;
         this.fallbackUrl = fallbackUrl;
         this.title = title;
@@ -35,6 +32,7 @@ public class AwwImage implements Parcelable {
         this.name = name;
     }
 
+    @NonNull
     public String getPrimaryUrl() {
         return primaryUrl;
     }
@@ -47,10 +45,12 @@ public class AwwImage implements Parcelable {
         return title;
     }
 
+    @NonNull
     public String getThumbnail() {
         return thumbnail;
     }
 
+    @NonNull
     public String getLink() {
         return link;
     }
@@ -62,14 +62,6 @@ public class AwwImage implements Parcelable {
     public String getName() {
         return name;
     }
-
-//    public int getId() {
-//        return id;
-//    }
-//
-//    public void setId(int id) {
-//        this.id = id;
-//    }
 
     protected AwwImage(Parcel in) {
         primaryUrl = in.readString();
