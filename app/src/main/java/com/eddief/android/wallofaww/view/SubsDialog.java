@@ -1,4 +1,4 @@
-package com.example.android.petpics.view;
+package com.eddief.android.wallofaww.view;
 
 import android.annotation.SuppressLint;
 import android.app.AlertDialog;
@@ -8,16 +8,19 @@ import android.content.DialogInterface;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.v4.app.DialogFragment;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.CheckBox;
 import android.widget.CompoundButton;
 import android.widget.Toast;
 
-import com.example.android.petpics.R;
+import com.eddief.android.wallofaww.R;
 
 import java.util.ArrayList;
 import java.util.List;
+
+import static com.eddief.android.wallofaww.view.MainActivity.subReddits;
 
 
 public class SubsDialog extends DialogFragment {
@@ -62,10 +65,9 @@ public class SubsDialog extends DialogFragment {
             CheckBox checkBox = view.findViewById(id);
             checkBox.setChecked(true);
         }
-        setCheckBox(view, R.id.aww);
-        setCheckBox(view, R.id.corgi);
-        setCheckBox(view, R.id.rarepuppers);
-        setCheckBox(view, R.id.eyebleach);
+        for (int subreddit : subReddits) {
+            setCheckBox(view, subreddit);
+        }
 
         AlertDialog alertDialog = new AlertDialog.Builder(context)
                 .setView(view)

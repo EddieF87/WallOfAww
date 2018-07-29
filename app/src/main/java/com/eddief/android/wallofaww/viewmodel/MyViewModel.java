@@ -1,4 +1,4 @@
-package com.example.android.petpics.viewmodel;
+package com.eddief.android.wallofaww.viewmodel;
 
 import android.app.Application;
 import android.arch.lifecycle.AndroidViewModel;
@@ -6,7 +6,9 @@ import android.arch.lifecycle.LiveData;
 import android.arch.lifecycle.MutableLiveData;
 import android.support.annotation.NonNull;
 
-import com.example.android.petpics.model.AwwImage;
+import com.eddief.android.wallofaww.model.AwwImage;
+import com.eddief.android.wallofaww.model.Repo;
+import com.eddief.android.wallofaww.model.Resource;
 
 import java.util.List;
 
@@ -14,50 +16,46 @@ public class MyViewModel extends AndroidViewModel {
 
 
     private final Repo mRepo;
-    private MutableLiveData<List<AwwImage>> mAwwImageData;
-    private boolean isFavorites;
+    private MutableLiveData<Resource<List<AwwImage>>> mAwwImageData;
+    private boolean mIsFavorites;
 
     public MyViewModel(@NonNull Application application) {
         super(application);
         mRepo = new Repo(application);
     }
 
-    public LiveData<List<AwwImage>> getAwwImageData(String path){
+    public LiveData<Resource<List<AwwImage>>> getAwwImageData(String path){
         if(this.mAwwImageData != null) {
             return this.mAwwImageData;
         }
         return getDataFromRepository(path);
     }
 
-    private LiveData<List<AwwImage>> getDataFromRepository(String path) {
-        this.mAwwImageData = mRepo.addLiveData(path,null);
+    public LiveData<Resource<List<AwwImage>>> getDataFromRepository(String path) {
+        this.mAwwImageData = mRepo.addLiveData(path);
         return this.mAwwImageData;
     }
 
-    public boolean isFavorites() {
-        return isFavorites;
-    }
-
-    public void switchFavorites() {
-        isFavorites = !isFavorites;
-    }
-
-    public void toggleFavorites(String path) {
-        isFavorites = !isFavorites;
-        if(isFavorites){
-            mRepo.getFavorites();
-        } else {
-            mRepo.addLiveData(path, null);
+    public void getFreshData(String path) {
+        if(!mIsFavorites){
+            mRepo.getFreshData(path);
         }
     }
 
-    public void addImages(String path, String id) {
-        mRepo.addLiveData(path, id);
+    public boolean isFavorites() {
+        return mIsFavorites;
     }
 
-    public void getFreshData(String path) {
-        if(!isFavorites){
-            mRepo.getFreshData(path);
+    public void switchFavorites() {
+        mIsFavorites = !mIsFavorites;
+    }
+
+    public void toggleFavorites(String path) {
+        switchFavorites();
+        if(mIsFavorites){
+            mRepo.getFavorites();
+        } else {
+            mRepo.addLiveData(path);
         }
     }
 }

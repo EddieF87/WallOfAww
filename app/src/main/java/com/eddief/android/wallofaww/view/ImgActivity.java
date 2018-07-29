@@ -1,4 +1,4 @@
-package com.example.android.petpics.view;
+package com.eddief.android.wallofaww.view;
 
 import android.arch.lifecycle.ViewModelProviders;
 import android.content.Intent;
@@ -13,11 +13,11 @@ import android.widget.MediaController;
 import android.widget.TextView;
 import android.widget.VideoView;
 
-import com.example.android.petpics.R;
-import com.example.android.petpics.model.AwwImage;
-import com.example.android.petpics.model.AwwRoomDB;
-import com.example.android.petpics.model.ImageDao;
-import com.example.android.petpics.viewmodel.ImageViewModel;
+import com.eddief.android.wallofaww.R;
+import com.eddief.android.wallofaww.model.AwwImage;
+import com.eddief.android.wallofaww.model.AwwRoomDB;
+import com.eddief.android.wallofaww.model.ImageDao;
+//import com.eddief.android.wallofaww.viewmodel.ImageViewModel;
 import com.squareup.picasso.Callback;
 import com.squareup.picasso.Picasso;
 

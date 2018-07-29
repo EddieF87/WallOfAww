@@ -1,4 +1,4 @@
-package com.example.android.petpics.model;
+package com.eddief.android.wallofaww.model;
 
 import com.google.gson.annotations.SerializedName;
 

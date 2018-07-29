@@ -8,31 +8,67 @@
     tools:context=".view.SubsDialog">
 
     <CheckBox
+        style="@style/CheckBoxStyle"
         android:id="@+id/aww"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:padding="4dp"
         android:text="@string/r_aww" />
 
     <CheckBox
+        style="@style/CheckBoxStyle"
         android:id="@+id/corgi"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:padding="4dp"
         android:text="@string/r_corgi" />
 
     <CheckBox
+        style="@style/CheckBoxStyle"
         android:id="@+id/rarepuppers"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:padding="4dp"
         android:text="@string/r_rarepuppers" />
 
     <CheckBox
+        style="@style/CheckBoxStyle"
         android:id="@+id/eyebleach"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:padding="4dp"
         android:text="@string/r_eyebleach" />
 
+    <CheckBox
+        style="@style/CheckBoxStyle"
+        android:id="@+id/kitty"
+        android:text="@string/r_kitty" />
+
+    <CheckBox
+        style="@style/CheckBoxStyle"
+        android:id="@+id/foxes"
+        android:text="@string/r_foxes" />
+
+    <CheckBox
+        style="@style/CheckBoxStyle"
+        android:id="@+id/cute"
+        android:text="@string/r_cute" />
+
+    <CheckBox
+        style="@style/CheckBoxStyle"
+        android:id="@+id/pomeranians"
+        android:text="@string/r_pomeranians" />
+
+    <CheckBox
+        style="@style/CheckBoxStyle"
+        android:id="@+id/rabbits"
+        android:text="@string/r_rabbits" />
+
+    <CheckBox
+        style="@style/CheckBoxStyle"
+        android:id="@+id/redpandas"
+        android:text="@string/r_redpandas" />
+
+    <CheckBox
+        style="@style/CheckBoxStyle"
+        android:id="@+id/dogpictures"
+        android:text="@string/r_dogpictures" />
+
+    <CheckBox
+        style="@style/CheckBoxStyle"
+        android:id="@+id/catpictures"
+        android:text="@string/r_catpictures" />
+
+    <CheckBox
+        style="@style/CheckBoxStyle"
+        android:id="@+id/cats"
+        android:text="@string/r_cats" />
 </LinearLayout>

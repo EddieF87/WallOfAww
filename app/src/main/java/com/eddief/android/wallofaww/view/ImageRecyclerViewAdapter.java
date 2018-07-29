@@ -1,4 +1,4 @@
-package com.example.android.petpics.view;
+package com.eddief.android.wallofaww.view;
 
 import android.support.annotation.NonNull;
 import android.support.v7.widget.RecyclerView;
@@ -9,8 +9,8 @@ import android.widget.ImageView;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
-import com.example.android.petpics.R;
-import com.example.android.petpics.model.AwwImage;
+import com.eddief.android.wallofaww.R;
+import com.eddief.android.wallofaww.model.AwwImage;
 import com.squareup.picasso.Picasso;
 
 import java.util.List;

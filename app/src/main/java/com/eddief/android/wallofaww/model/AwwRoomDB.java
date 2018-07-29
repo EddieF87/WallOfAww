@@ -1,4 +1,4 @@
-package com.example.android.petpics.model;
+package com.eddief.android.wallofaww.model;
 
 import android.arch.persistence.room.Database;
 import android.arch.persistence.room.Room;

@@ -1,4 +1,4 @@
-package com.example.android.petpics.view;
+package com.eddief.android.wallofaww.view;
 
 import android.arch.lifecycle.LiveData;
 import android.arch.lifecycle.Observer;
@@ -17,15 +17,20 @@ import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.Toast;
 
-import com.example.android.petpics.R;
-import com.example.android.petpics.model.AwwImage;
-import com.example.android.petpics.viewmodel.MyViewModel;
+import com.eddief.android.wallofaww.R;
+import com.eddief.android.wallofaww.model.AwwImage;
+import com.eddief.android.wallofaww.model.Resource;
+import com.eddief.android.wallofaww.viewmodel.MyViewModel;
 
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 
@@ -34,7 +39,7 @@ public class MainActivity extends AppCompatActivity
         implements ImageRecyclerViewAdapter.ItemClickListener,
         SubsDialog.OnFragmentInteractionListener {
 
-    private LiveData<List<AwwImage>> myLiveData;
+    private LiveData<Resource<List<AwwImage>>> myLiveData;
     private MyViewModel myViewModel;
     private Menu optionsMenu;
     private RecyclerView mRecyclerView;
@@ -42,6 +47,11 @@ public class MainActivity extends AppCompatActivity
     private SwipeRefreshLayout mSwipeRefreshLayout;
     private String mPath;
     private boolean canCall = true;
+    public static final Collection<Integer> subReddits = Collections.unmodifiableList(Arrays.asList(
+        R.id.aww,  R.id.rarepuppers, R.id.corgi,   R.id.eyebleach,
+        R.id.kitty,  R.id.foxes, R.id.cute,   R.id.pomeranians,   R.id.cats,
+        R.id.rabbits,  R.id.redpandas, R.id.dogpictures,   R.id.catpictures)
+    );
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -51,37 +61,43 @@ public class MainActivity extends AppCompatActivity
         setPath();
         myViewModel = ViewModelProviders.of(this).get(MyViewModel.class);
 
-        final Observer<List<AwwImage>> myObserver = new Observer<List<AwwImage>>() {
+        final Observer<Resource<List<AwwImage>>> myObserver = new Observer<Resource<List<AwwImage>>>() {
             @Override
-            public void onChanged(@Nullable List<AwwImage> awwImageData) {
-                canCall = true;
+            public void onChanged(@Nullable Resource<List<AwwImage>> awwImageData) {
                 endRefresh();
 
-                if (awwImageData == null || awwImageData.isEmpty()) {
+                if (awwImageData == null) {
+                    return;
+                }
+                if(awwImageData.getError() != null) {
+                    Toast.makeText(MainActivity.this, "ERROR: " + awwImageData.getError(), Toast.LENGTH_LONG).show();
+                    return;
+                }
+                List<AwwImage> awwImages = awwImageData.getData();
+
+                if (awwImages == null || awwImages.isEmpty()) {
                     if (myViewModel.isFavorites()) {
                         optionsMenu.findItem(R.id.action_fav).setIcon(R.drawable.ic_action_save);
                         myViewModel.switchFavorites();
                     }
                     return;
                 }
-
-                initRecyclerView(awwImageData);
+                initRecyclerView(awwImages);
             }
         };
-        myLiveData =
-                myViewModel.getAwwImageData(mPath);
+        myLiveData = myViewModel.getAwwImageData(mPath);
         myLiveData.observe(this, myObserver);
 
         mSwipeRefreshLayout = findViewById(R.id.swipe_refresh_layout);
         mSwipeRefreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
             @Override
             public void onRefresh() {
-                if (checkConnection()) {
-                    Objects.requireNonNull(myLiveData.getValue()).clear();
-                    mAdapter.notifyDataSetChanged();
+                if (checkConnection() && !myViewModel.isFavorites()) {
+                    Objects.requireNonNull(myLiveData.getValue()).getData().clear();
+                    if(mAdapter != null) {
+                        mAdapter.notifyDataSetChanged();
+                    }
                     myViewModel.getFreshData(mPath);
-                } else {
-                    endRefresh();
                 }
             }
         });
@@ -95,6 +111,7 @@ public class MainActivity extends AppCompatActivity
         }
         if (networkInfo == null || !networkInfo.isConnected()) {
             Toast.makeText(this, "Please connect to a stable data connection!", Toast.LENGTH_LONG).show();
+            endRefresh();
             return false;
         }
         return true;
@@ -114,10 +131,10 @@ public class MainActivity extends AppCompatActivity
                             return;
                         }
                         if (checkConnection()) {
-                            myViewModel.addImages(mPath, awwImageData.get(awwImageData.size() - 1).getName());
+                            myViewModel.getDataFromRepository(mPath);
+                            canCall = false;
+                            startRefresh();
                         }
-                        canCall = false;
-                        startRefresh();
                     }
                 }
             });
@@ -169,25 +186,13 @@ public class MainActivity extends AppCompatActivity
                 SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
                 ArrayList<Integer> checked = new ArrayList<>();
                 ArrayList<Integer> unchecked = new ArrayList<>();
-                if (sharedPreferences.getBoolean(String.valueOf(R.id.aww), true)) {
-                    checked.add(R.id.aww);
-                } else {
-                    unchecked.add(R.id.aww);
-                }
-                if (sharedPreferences.getBoolean(String.valueOf(R.id.corgi), true)) {
-                    checked.add(R.id.corgi);
-                } else {
-                    unchecked.add(R.id.corgi);
-                }
-                if (sharedPreferences.getBoolean(String.valueOf(R.id.rarepuppers), true)) {
-                    checked.add(R.id.rarepuppers);
-                } else {
-                    unchecked.add(R.id.rarepuppers);
-                }
-                if (sharedPreferences.getBoolean(String.valueOf(R.id.eyebleach), true)) {
-                    checked.add(R.id.eyebleach);
-                } else {
-                    unchecked.add(R.id.eyebleach);
+
+                for(int subreddit : subReddits) {
+                    if (sharedPreferences.getBoolean(String.valueOf(subreddit), true)) {
+                        checked.add(subreddit);
+                    } else {
+                        unchecked.add(subreddit);
+                    }
                 }
 
                 FragmentManager fragmentManager = getSupportFragmentManager();
@@ -214,16 +219,39 @@ public class MainActivity extends AppCompatActivity
         if (sharedPreferences.getBoolean(String.valueOf(R.id.eyebleach), true)) {
             subs.add("eyebleach");
         }
+        if (sharedPreferences.getBoolean(String.valueOf(R.id.kitty), true)) {
+            subs.add("kitty");
+        }
+        if (sharedPreferences.getBoolean(String.valueOf(R.id.foxes), true)) {
+            subs.add("foxes");
+        }
+        if (sharedPreferences.getBoolean(String.valueOf(R.id.cute), true)) {
+            subs.add("cute");
+        }
+        if (sharedPreferences.getBoolean(String.valueOf(R.id.pomeranians), true)) {
+            subs.add("pomeranians");
+        }
+        if (sharedPreferences.getBoolean(String.valueOf(R.id.rabbits), true)) {
+            subs.add("rabbits");
+        }
+        if (sharedPreferences.getBoolean(String.valueOf(R.id.redpandas), true)) {
+            subs.add("redpandas");
+        }
+        if (sharedPreferences.getBoolean(String.valueOf(R.id.dogpictures), true)) {
+            subs.add("dogpictures");
+        }
+        if (sharedPreferences.getBoolean(String.valueOf(R.id.catpictures), true)) {
+            subs.add("catpictures");
+        }
+        if (sharedPreferences.getBoolean(String.valueOf(R.id.cats), true)) {
+            subs.add("cats");
+        }
         mPath = subs.toString().replace(", ", "+")
                 .replace("[", "").replace("]", "");
     }
 
     @Override
     public void onPreferencesSaved(List<Integer> checked, List<Integer> unchecked) {
-        startRefresh();
-
-        Objects.requireNonNull(myLiveData.getValue()).clear();
-        mAdapter.notifyDataSetChanged();
 
         SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
         SharedPreferences.Editor editor = sharedPreferences.edit();
@@ -235,12 +263,24 @@ public class MainActivity extends AppCompatActivity
         }
         editor.apply();
         setPath();
+
+        if(myViewModel.isFavorites()){
+            return;
+        }
+
+        startRefresh();
+
+        Objects.requireNonNull(myLiveData.getValue()).getData().clear();
+        if(mAdapter != null) {
+            mAdapter.notifyDataSetChanged();
+        }
         if (checkConnection()) {
             myViewModel.getFreshData(mPath);
         }
     }
 
     private void endRefresh() {
+        canCall = true;
         if (mSwipeRefreshLayout != null && mSwipeRefreshLayout.isRefreshing()) {
             mSwipeRefreshLayout.setRefreshing(false);
         }

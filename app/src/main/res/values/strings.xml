@@ -12,4 +12,13 @@
     <string name="r_rarepuppers">r/rarepuppers</string>
     <string name="r_eyebleach">r/eyebleach</string>
     <string name="image">image</string>
+    <string name="r_catpictures">r/catpictures</string>
+    <string name="r_cats">r/cats</string>
+    <string name="r_dogpictures">r/dogpictures</string>
+    <string name="r_redpandas">r/redpandas</string>
+    <string name="r_rabbits">r/rabbits</string>
+    <string name="r_pomeranians">r/pomeranians</string>
+    <string name="r_cute">r/cute</string>
+    <string name="r_kitty">r/kitty</string>
+    <string name="r_foxes">r/foxes</string>
 </resources>

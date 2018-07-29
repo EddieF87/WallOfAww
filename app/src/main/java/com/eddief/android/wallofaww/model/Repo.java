@@ -1,16 +1,17 @@
-package com.example.android.petpics.viewmodel;
+package com.eddief.android.wallofaww.model;
 
 import android.app.Application;
 import android.arch.lifecycle.MutableLiveData;
 import android.os.AsyncTask;
 import android.support.annotation.NonNull;
+import android.util.Log;
 
-import com.example.android.petpics.model.AwwImage;
-import com.example.android.petpics.model.AwwRoomDB;
-import com.example.android.petpics.model.ImageDao;
-import com.example.android.petpics.model.RedditAPI;
-import com.example.android.petpics.model.RedditPOJO;
-import com.example.android.petpics.model.RedditPostData;
+import com.eddief.android.wallofaww.model.AwwImage;
+import com.eddief.android.wallofaww.model.AwwRoomDB;
+import com.eddief.android.wallofaww.model.ImageDao;
+import com.eddief.android.wallofaww.model.RedditAPI;
+import com.eddief.android.wallofaww.model.RedditPOJO;
+import com.eddief.android.wallofaww.model.RedditPostData;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -26,27 +27,36 @@ public class Repo {
     private static final String BASE_URL = "https://www.reddit.com";
     private final ImageDao mImageDao;
     private List<AwwImage> mFavorites;
-    private MutableLiveData<List<AwwImage>> mImages;
+    private MutableLiveData<Resource<List<AwwImage>>> mImages;
 
-    Repo(Application application) {
+    public Repo(Application application) {
         AwwRoomDB db = AwwRoomDB.getDatabase(application);
         this.mImageDao = db.imageDao();
     }
 
-    public MutableLiveData<List<AwwImage>> addLiveData(String path, String id) {
+    public MutableLiveData<Resource<List<AwwImage>>> addLiveData(String path) {
 
         final List<AwwImage> awwImages;
+        String id = null;
 
         if(mImages == null) {
             mImages = new MutableLiveData<>();
             awwImages = new ArrayList<>();
         } else {
-            awwImages = mImages.getValue();
+            Resource<List<AwwImage>> awwImagesData = mImages.getValue();
+            if(awwImagesData != null) {
+                awwImages = awwImagesData.getData();
+                try {
+                    id = awwImages.get(awwImages.size() - 1).getName();
+                } catch (Exception ignored) {}
+            } else {
+                awwImages = new ArrayList<>();
+            }
         }
         return getmImages(awwImages, path, id);
     }
 
-    private MutableLiveData<List<AwwImage>> getmImages(final List<AwwImage> awwImages, String path, String id) {
+    private MutableLiveData<Resource<List<AwwImage>>> getmImages(final List<AwwImage> awwImages, String path, String id) {
         Retrofit.Builder builder = new Retrofit.Builder()
                 .baseUrl(BASE_URL)
                 .addConverterFactory(GsonConverterFactory.create());
@@ -58,17 +68,24 @@ public class Repo {
         redditCall.enqueue(new Callback<RedditPOJO>() {
             @Override
             public void onResponse(@NonNull Call<RedditPOJO> call, @NonNull Response<RedditPOJO> response) {
+                Resource<List<AwwImage>> awwImageData;
                 try {
                     @SuppressWarnings("ConstantConditions") RedditPOJO.RedditPost[] redditPosts = response.body().getData().getChildren();
                     List<AwwImage> newAwwImageList = getList(redditPosts);
                     awwImages.addAll(newAwwImageList);
-                    mImages.postValue(awwImages);
+                    awwImageData = new Resource<>(awwImages, null);
+                    mImages.postValue(awwImageData);
                 }
-                catch (Exception ignored){}
+                catch (Exception e){
+                    awwImageData = new Resource<>(awwImages, e.toString());
+                    mImages.postValue(awwImageData);
+                }
             }
 
             @Override
             public void onFailure(@NonNull Call<RedditPOJO> call, @NonNull Throwable t) {
+                Resource<List<AwwImage>> awwImageData = new Resource<>(awwImages, t.toString());
+                mImages.postValue(awwImageData);
             }
         });
         return mImages;
@@ -135,11 +152,17 @@ public class Repo {
     }
 
     public void getFreshData(String path) {
-        List<AwwImage> awwImages = mImages.getValue();
-        if(awwImages == null) {
-            awwImages = new ArrayList<>();
+        List<AwwImage> awwImages;
+        Resource<List<AwwImage>> awwImagesData = mImages.getValue();
+        if(awwImagesData != null) {
+            awwImages = awwImagesData.getData();
+            if(awwImages == null) {
+                awwImages = new ArrayList<>();
+            } else {
+                awwImages.clear();
+            }
         } else {
-            awwImages.clear();
+            awwImages = new ArrayList<>();
         }
         getmImages(awwImages, path, null);
     }
@@ -164,7 +187,7 @@ public class Repo {
 
         @Override
         protected void onPostExecute(Void aVoid) {
-            mImages.setValue(mFavorites);
+            mImages.setValue(new Resource<>(mFavorites, null));
         }
     }
 }
