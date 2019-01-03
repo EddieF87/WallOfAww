@@ -24,6 +24,4 @@ public interface ImageDao {
 
     @Query("SELECT * FROM aww_table WHERE primaryUrl LIKE :url")
     List<AwwImage> checkIfExists(String url);
-
-
 }

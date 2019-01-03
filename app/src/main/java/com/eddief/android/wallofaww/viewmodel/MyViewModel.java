@@ -55,7 +55,7 @@ public class MyViewModel extends AndroidViewModel {
         if(mIsFavorites){
             mRepo.getFavorites();
         } else {
-            mRepo.addLiveData(path);
+            mRepo.getFreshData(path);
         }
     }
 }

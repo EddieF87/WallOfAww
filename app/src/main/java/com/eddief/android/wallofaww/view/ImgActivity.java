@@ -1,10 +1,10 @@
 package com.eddief.android.wallofaww.view;
 
-import android.arch.lifecycle.ViewModelProviders;
 import android.content.Intent;
+import android.media.MediaPlayer;
 import android.net.Uri;
-import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.support.v7.app.AppCompatActivity;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -17,16 +17,15 @@ import com.eddief.android.wallofaww.R;
 import com.eddief.android.wallofaww.model.AwwImage;
 import com.eddief.android.wallofaww.model.AwwRoomDB;
 import com.eddief.android.wallofaww.model.ImageDao;
-//import com.eddief.android.wallofaww.viewmodel.ImageViewModel;
 import com.squareup.picasso.Callback;
 import com.squareup.picasso.Picasso;
 
 import java.util.List;
 
+
 public class ImgActivity extends AppCompatActivity {
 
     private AwwImage mAwwImage;
-//    private ImageViewModel mImageViewModel;
     private VideoView mVideoView;
     private int mVideoPosition;
     private Menu imageMenu;
@@ -41,7 +40,6 @@ public class ImgActivity extends AppCompatActivity {
             mVideoPosition = savedInstanceState.getInt("pos", 0);
         }
 
-//        mImageViewModel = ViewModelProviders.of(this).get(ImageViewModel.class);
         AwwRoomDB db = AwwRoomDB.getDatabase(getApplication());
         this.mImageDao = db.imageDao();
 
@@ -62,14 +60,27 @@ public class ImgActivity extends AppCompatActivity {
         titleView.setText(title);
     }
 
-    private void playVideo(String vidUrl) {
+    private void playVideo(final String vidUrl) {
 
         ImageView imageView = findViewById(R.id.image_full);
         mVideoView = findViewById(R.id.vidView);
         imageView.setVisibility(View.GONE);
         mVideoView.setVisibility(View.VISIBLE);
+        mVideoView.setOnPreparedListener(new MediaPlayer.OnPreparedListener() {
+            @Override
+            public void onPrepared(MediaPlayer mp) {
+                mp.setLooping(true);
+            }
+        });
+        mVideoView.setOnErrorListener(new MediaPlayer.OnErrorListener() {
+            @Override
+            public boolean onError(MediaPlayer mediaPlayer, int i, int i1) {
+                playVideo(vidUrl);
+                return true;
+            }
+        });
 
-        MediaController mc = new MediaController(this);
+        MediaController mc = new MediaController(this, false);
         mc.setAnchorView(mVideoView);
         mc.setMediaPlayer(mVideoView);
         mVideoView.setMediaController(mc);
