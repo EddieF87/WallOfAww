@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">Wall of Aww</string>
+    <string name="app_name">Infinite Aww</string>
     <string name="cancel">Cancel</string>
     <string name="save">Save</string>
     <string name="gif">GIF</string>
@@ -21,4 +21,8 @@
     <string name="r_cute">r/cute</string>
     <string name="r_kitty">r/kitty</string>
     <string name="r_foxes">r/foxes</string>
+    <string name="edit_columns">Edit Columns</string>
+    <string name="columns">Columns: %1$d</string>
+    <string name="fetch_error">No images found. Please check your connection and swipe down to refresh.</string>
+    <string name="no_favorites">No favorites. Star some of your favorite photos &amp; videos and they\'ll show up here!</string>
 </resources>

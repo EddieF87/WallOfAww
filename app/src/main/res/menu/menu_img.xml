@@ -4,17 +4,17 @@
 
     <item android:id="@+id/action_save"
         android:title="@string/save"
-        android:icon="@drawable/ic_action_save"
+        android:icon="@drawable/ic_save"
         app:showAsAction="ifRoom"
         />
     <item android:id="@+id/action_link"
         android:title="@string/link"
-        android:icon="@drawable/ic_action_link"
+        android:icon="@drawable/ic_link"
         app:showAsAction="always"
         />
     <item android:id="@+id/action_send"
         android:title="@string/send"
-        android:icon="@drawable/ic_action_send"
+        android:icon="@drawable/ic_send"
         app:showAsAction="always"
         />
 </menu>
